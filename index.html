@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentCar - Premium Car Rental Service</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Configure Tailwind to use Inter font and custom colors -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#2563EB',
+                        'secondary': '#10B981',
+                        'dark-text': '#1F2937',
+                        'light-bg': '#F9FAFB',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            transition: all 0.3s ease;
+        }
+        
+        .phone-mockup {
+            background: #fff;
+            border: 10px solid #1F2937;
+            border-radius: 40px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 400px;
+            width: 200px;
+            overflow: hidden;
+        }
+        .phone-mockup::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 10px;
+            background: #1F2937;
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+            z-index: 10;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 400px;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-5px);
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #2563EB 0%, #10B981 100%);
+        }
+        
+        .car-image {
+            transition: transform 0.7s ease;
+        }
+        
+        .car-card:hover .car-image {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+
+<body class="font-sans text-dark-text bg-white">
+
+    <!-- Mobile Navigation (Hamburger Menu) -->
+    <header class="sticky top-0 z-50 bg-white shadow-md">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <!-- Logo with image -->
+            <a href="#" class="flex items-center text-xl font-bold text-primary">
+                <i class="fas fa-car text-2xl mr-2"></i>
+                <span>RentCars.</span>
+            </a>
+
+            <!-- Mobile Menu Button (Hamburger) -->
+            <button id="mobile-menu-button" class="md:hidden p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+            </button>
+
+            <!-- Desktop Navigation Links (Hidden on Mobile) -->
+            <nav class="hidden md:flex space-x-8 text-gray-600">
+                <a href="#" class="hover:text-primary font-medium">Home</a>
+                <a href="#" class="hover:text-primary font-medium">Vehicles</a>
+                <a href="#" class="hover:text-primary font-medium">How it Works</a>
+                <a href="#" class="hover:text-primary font-medium">Contact</a>
+                <button id="login-btn-desktop" class="px-4 py-2 bg-primary text-white rounded-xl shadow-md hover:bg-blue-700 hover-lift">Login</button>
+            </nav>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <nav id="mobile-menu" class="hidden md:hidden absolute w-full bg-white shadow-lg border-t border-gray-100">
+            <a href="#" class="block px-4 py-3 text-gray-700 hover:bg-light-bg">Home</a>
+            <a href="#" class="block px-4 py-3 text-gray-700 hover:bg-light-bg">Vehicles</a>
+            <a href="#" class="block px-4 py-3 text-gray-700 hover:bg-light-bg">How it Works</a>
+            <a href="#" class="block px-4 py-3 text-gray-700 hover:bg-light-bg">Contact</a>
+            <button id="login-btn-mobile" class="block w-full text-left px-4 py-3 text-white bg-primary hover:bg-blue-700">Login</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- 1. HERO SECTION -->
+        <section class="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-16 md:pt-16 md:pb-24 overflow-hidden">
+            <div class="flex flex-col md:flex-row items-center gap-10">
+                <!-- Left Content -->
+                <div class="w-full md:w-1/2 text-center md:text-left animate-fadeInUp">
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-4 text-dark-text">
+                        Find, book and rent a car <span class="text-primary">easily</span>.
+                    </h1>
+                    <p class="text-gray-600 mb-8 text-lg">
+                        We provide you with the best car rental deals for your seamless journey. Pick up and drop off at any location globally.
+                    </p>
+                    
+                    <!-- Search Form -->
+                    <div class="p-3 bg-white shadow-xl rounded-2xl max-w-lg mx-auto md:mx-0 hover-lift">
+                        <input type="text" placeholder="Search for location, date, or car type..." class="w-full p-3 border border-gray-200 rounded-lg focus:ring-primary focus:border-primary">
+                        <button class="mt-4 w-full py-3 bg-primary text-white font-semibold rounded-xl hover:bg-blue-700 shadow-lg transition duration-300 hover-lift">
+                            Search Car
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Image -->
+                <div class="w-full md:w-1/2 mt-8 md:mt-0 relative">
+                    <!-- Car Image with overlay effect -->
+                    <div class="relative rounded-3xl shadow-2xl overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                             alt="Blue sports electric sedan car" 
+                             class="w-full h-auto object-cover car-image"
+                        >
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. HOW IT WORKS SECTION -->
+        <section class="bg-light-bg py-16">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-center mb-12 text-dark-text">Rent with following <span class="text-primary">4 working steps</span></h2>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- Step 1 -->
+                    <div class="flex flex-col items-center text-center p-6 bg-white rounded-3xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition duration-300">
+                        <div class="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-map-marker-alt text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Choose Location</h3>
+                        <p class="text-gray-600">Select your pick-up point and preferred date and time.</p>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="flex flex-col items-center text-center p-6 bg-white rounded-3xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition duration-300">
+                        <div class="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-car text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Select a Car</h3>
+                        <p class="text-gray-600">Browse and choose from our wide range of premium vehicles.</p>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="flex flex-col items-center text-center p-6 bg-white rounded-3xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition duration-300">
+                        <div class="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-credit-card text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Make Payment</h3>
+                        <p class="text-gray-600">Securely confirm your booking with a quick and easy payment.</p>
+                    </div>
+                    
+                    <!-- Step 4 -->
+                    <div class="flex flex-col items-center text-center p-6 bg-white rounded-3xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition duration-300">
+                        <div class="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-4">
+                            <i class="fas fa-road text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Enjoy The Ride</h3>
+                        <p class="text-gray-600">Pick up your car and start your adventure with peace of mind.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. FEATURED BRANDS SECTION -->
+        <section class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="flex flex-wrap justify-center md:justify-between items-center gap-6 md:gap-12 opacity-75">
+                <!-- Brand Logos -->
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Honda_logo.svg/2560px-Honda_logo.svg.png" alt="Honda" class="h-8 md:h-10 object-contain filter grayscale hover:grayscale-0 transition-all">
+                <img src="https://upload.wikimedia.org/wikipedia/en/thumb/7/70/Jaguar_2012_logo.svg/2560px-Jaguar_2012_logo.svg.png" alt="Jaguar" class="h-8 md:h-10 object-contain filter grayscale hover:grayscale-0 transition-all">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Volvo_Logo_IRL.jpg/2560px-Volvo_Logo_IRL.jpg" alt="Volvo" class="h-8 md:h-10 object-contain filter grayscale hover:grayscale-0 transition-all">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Audi-Logo_2016.svg/2560px-Audi-Logo_2016.svg.png" alt="Audi" class="h-8 md:h-10 object-contain filter grayscale hover:grayscale-0 transition-all">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Acura_logo.svg/2560px-Acura_logo.svg.png" alt="Acura" class="h-8 md:h-10 object-contain filter grayscale hover:grayscale-0 transition-all hidden sm:block">
+            </div>
+        </section>
+
+        <!-- 4. VALUE PROPOSITION SECTION -->
+        <section class="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div class="flex flex-col md:flex-row items-center gap-10">
+                <!-- Left Image -->
+                <div class="w-full md:w-1/2 relative">
+                    <!-- Car Image with overlay effect -->
+                    <div class="relative rounded-3xl shadow-xl overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1593941707882-a5bba5338e2c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                             alt="Silver sports car" 
+                             class="w-full h-auto object-cover car-image"
+                        >
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                    </div>
+                </div>
+
+                <!-- Right Content -->
+                <div class="w-full md:w-1/2 text-center md:text-left mt-8 md:mt-0">
+                    <h2 class="text-3xl font-bold mb-6 text-dark-text">
+                        We offer the best experience with our deals.
+                    </h2>
+                    <ul class="space-y-4 text-left mx-auto md:mx-0 max-w-sm md:max-w-none">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-primary text-xl mr-3 mt-1 flex-shrink-0"></i>
+                            <div>
+                                <h3 class="font-semibold text-lg">Flexible Bookings</h3>
+                                <p class="text-gray-600">Modify or cancel your reservation easily with no hidden fees.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-primary text-xl mr-3 mt-1 flex-shrink-0"></i>
+                            <div>
+                                <h3 class="font-semibold text-lg">24/7 Roadside Assistance</h3>
+                                <p class="text-gray-600">Help is just a call away, anytime, anywhere in your journey.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-primary text-xl mr-3 mt-1 flex-shrink-0"></i>
+                            <div>
+                                <h3 class="font-semibold text-lg">Premium Vehicle Fleet</h3>
+                                <p class="text-gray-600">Choose from brand new, well-maintained luxury and economy cars.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. POPULAR CARS SECTION -->
+        <section class="bg-light-bg py-16">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-center mb-12 text-dark-text">Meet popular <span class="text-primary">cars rental deals</span></h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    
+                    <!-- Car Card 1 (Blue) -->
+                    <div class="car-card bg-white p-6 rounded-3xl shadow-lg hover:shadow-xl transition duration-300 border-t-4 border-primary hover-lift">
+                        <div class="overflow-hidden rounded-xl mb-4">
+                            <img src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80" 
+                                 alt="Porsche 911" 
+                                 class="w-full h-48 object-cover car-image"
+                            >
+                        </div>
+                        <h3 class="text-2xl font-bold text-dark-text mb-1">Porsche 911</h3>
+                        <p class="text-gray-500 mb-4">Sport Coupe</p>
+                        <div class="flex justify-between items-center mb-4 border-t pt-4">
+                            <span class="text-3xl font-bold text-primary">$150<span class="text-base font-normal text-gray-500">/day</span></span>
+                            <div class="flex items-center space-x-2 text-gray-600">
+                                <i class="fas fa-cog"></i>
+                                <span>Manual</span>
+                            </div>
+                        </div>
+                        <button class="rent-now-btn w-full py-3 bg-primary text-white font-semibold rounded-xl hover:bg-blue-700 shadow-md hover-lift">Rent Now</button>
+                    </div>
+
+                    <!-- Car Card 2 (Green) -->
+                    <div class="car-card bg-white p-6 rounded-3xl shadow-lg hover:shadow-xl transition duration-300 border-t-4 border-secondary hover-lift">
+                        <div class="overflow-hidden rounded-xl mb-4">
+                            <img src="https://images.unsplash.com/photo-1560958089-b8a1929cea89?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1471&q=80" 
+                                 alt="Tesla Model X" 
+                                 class="w-full h-48 object-cover car-image"
+                            >
+                        </div>
+                        <h3 class="text-2xl font-bold text-dark-text mb-1">Tesla Model X</h3>
+                        <p class="text-gray-500 mb-4">Electric SUV</p>
+                        <div class="flex justify-between items-center mb-4 border-t pt-4">
+                            <span class="text-3xl font-bold text-secondary">$120<span class="text-base font-normal text-gray-500">/day</span></span>
+                            <div class="flex items-center space-x-2 text-gray-600">
+                                <i class="fas fa-bolt"></i>
+                                <span>Automatic</span>
+                            </div>
+                        </div>
+                        <button class="rent-now-btn w-full py-3 bg-secondary text-white font-semibold rounded-xl hover:bg-green-600 shadow-md hover-lift">Rent Now</button>
+                    </div>
+
+                    <!-- Car Card 3 (Yellow) -->
+                    <div class="car-card bg-white p-6 rounded-3xl shadow-lg hover:shadow-xl transition duration-300 border-t-4 border-yellow-500 hover-lift">
+                        <div class="overflow-hidden rounded-xl mb-4">
+                            <img src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1374&q=80" 
+                                 alt="Mustang GT" 
+                                 class="w-full h-48 object-cover car-image"
+                            >
+                        </div>
+                        <h3 class="text-2xl font-bold text-dark-text mb-1">Mustang GT</h3>
+                        <p class="text-gray-500 mb-4">Muscle Car</p>
+                        <div class="flex justify-
